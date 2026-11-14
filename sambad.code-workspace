@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "../production/samvaad/.github"
 		}
 	],
 	"settings": {}

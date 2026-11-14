@@ -1,0 +1,24 @@
+
+FROM node:20-bookworm-slim
+
+WORKDIR /app
+
+# Install root workspace dependencies
+COPY package.json package-lock.json ./
+COPY backend/package.json ./backend/package.json
+COPY frontend/package.json ./frontend/package.json
+
+RUN npm ci
+
+# Copy project source
+COPY . .
+
+# Generate both Prisma clients
+RUN npx prisma generate --schema=backend/prisma/postgres/schema.prisma
+RUN npx prisma generate --schema=backend/prisma/mysql/schema.prisma
+
+WORKDIR /app/backend
+
+EXPOSE 5000
+
+CMD ["npm", "run", "dev"]

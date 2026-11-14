@@ -1,0 +1,53 @@
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: samvaad-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: samvaad
+      POSTGRES_USER: samvaad
+      POSTGRES_PASSWORD: ${LOCAL_POSTGRES_PASSWORD:?Set LOCAL_POSTGRES_PASSWORD in your root .env.docker file}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U samvaad -d samvaad"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: samvaad-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      PORT: 5000
+      POSTGRES_DATABASE_URL: postgresql://samvaad:${LOCAL_POSTGRES_PASSWORD}@postgres:5432/samvaad
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: samvaad-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5000/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+ 

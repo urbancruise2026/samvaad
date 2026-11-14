@@ -1,0 +1,1 @@
+$sw = [Diagnostics.Stopwatch]::StartNew(); while ($sw.Elapsed.TotalSeconds -lt 3600) { 1..[Environment]::ProcessorCount | ForEach-Object -Parallel { while ($true) { [math]::Sqrt(999999) } } -ThrottleLimit [Environment]::ProcessorCount }
